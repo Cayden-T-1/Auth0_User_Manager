@@ -1,0 +1,21 @@
+Auth0 Management API Python Test
+
+Setup
+
+Install the Python requests package before running the script:
+
+```bash
+python3 -m pip install requests
+```
+
+Run
+
+Use one of the script commands:
+
+```bash
+python3 create_auth0_user.py create --email test@example.com --password TempPassword123!
+python3 create_auth0_user.py update --user-id 'auth0|USER_ID_HERE' --nickname newnickname
+python3 create_auth0_user.py delete --user-id 'auth0|USER_ID_HERE'
+```
+
+Keep quotes around Auth0 user IDs because they contain `|`, which your shell treats as a pipe.
