@@ -2,9 +2,9 @@ import argparse
 import requests
 from urllib.parse import quote
 
-AUTH0_DOMAIN = "dev-24uc0lfu7st66b7k.us.auth0.com"  # example: dev-abc123.us.auth0.com
-CLIENT_ID = "PXa9EvwLYOTMeyVcvf0lY34tAZJ1joiB"
-CLIENT_SECRET = "Ae8bl0fqwT2MN3EmBHV7Km9OMr7JLsR-y4bMsg_oP00zKWZtLO7g_6qtSPfpBZE7"
+AUTH0_DOMAIN = ""  # example: dev-abc123.us.auth0.com
+CLIENT_ID = ""
+CLIENT_SECRET = ""
 
 CONNECTION = "Username-Password-Authentication"
 
