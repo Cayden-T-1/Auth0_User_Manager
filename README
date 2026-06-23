@@ -1,21 +1,350 @@
-Auth0 Management API Python Test
+# Auth0 User Manager
 
-Setup
+## Overview
 
-Install the Python requests package before running the script:
+Auth0 User Manager is a Python-based command-line utility for creating, updating, and deleting Auth0 user accounts through the Auth0 Management API.
+
+This project is intended for educational, training, and controlled testing purposes. It demonstrates how a Python script can obtain an Auth0 Management API token using the client credentials flow and then use that token to perform basic user management operations.
+
+> **Important:** This code was put together with the assistance of Codex expressly for educational purposes. Review, test, and harden the code before using it in any production or customer environment.
+
+---
+
+## Features
+
+This tool currently supports the following Auth0 user management actions:
+
+* Create a new Auth0 database user
+* Update selected user profile fields
+* Delete an existing Auth0 user
+* Request an Auth0 Management API access token using client credentials
+* Handle common Auth0 API errors
+* Confirm destructive delete operations before execution
+
+---
+
+## Supported Commands
+
+The script supports three primary commands:
+
+| Command  | Purpose                        |
+| -------- | ------------------------------ |
+| `create` | Creates a new Auth0 user       |
+| `update` | Updates an existing Auth0 user |
+| `delete` | Deletes an existing Auth0 user |
+
+---
+
+## Prerequisites
+
+Before using this project, confirm that you have:
+
+* Python 3 installed
+* Access to an Auth0 tenant
+* An Auth0 Machine-to-Machine application
+* Authorization for that application to call the Auth0 Management API
+* The required Auth0 Management API scopes
+* The Python `requests` package installed
+
+---
+
+## Required Auth0 Setup
+
+To use this script, you need an Auth0 Machine-to-Machine application that can request a Management API token.
+
+In Auth0, confirm the following:
+
+1. A Machine-to-Machine application exists.
+2. The application is authorized for the Auth0 Management API.
+3. The application has the required Management API scopes.
+4. The tenant domain, client ID, and client secret are available to the script.
+5. The target database connection exists, such as:
+
+```text
+Username-Password-Authentication
+```
+
+---
+
+## Required Management API Scopes
+
+The exact scopes depend on which commands you plan to use.
+
+| Command                                          | Likely Required Scope |
+| ------------------------------------------------ | --------------------- |
+| Create user                                      | `create:users`        |
+| Update user                                      | `update:users`        |
+| Delete user                                      | `delete:users`        |
+| Read users for validation or future enhancements | `read:users`          |
+
+Use the minimum set of scopes required for your testing. Avoid granting broad Management API permissions unless they are needed.
+
+---
+
+## Security Warning
+
+Do not hardcode production credentials in this repository.
+
+The following values are sensitive and should not be committed:
+
+* Auth0 client secrets
+* Auth0 Management API client secrets
+* Auth0 Management API access tokens
+* `.env` files
+* Real user exports
+* Customer data
+* Production tenant configuration
+* Passwords or temporary passwords used for real users
+
+If a real Auth0 client secret or token is accidentally committed, treat it as compromised and rotate it immediately in Auth0.
+
+---
+
+## Configuration
+
+The script requires the following Auth0 values:
+
+```python
+AUTH0_DOMAIN = ""
+CLIENT_ID = ""
+CLIENT_SECRET = ""
+CONNECTION = "Username-Password-Authentication"
+```
+
+### Recommended Approach
+
+For safer usage, credentials should be loaded from environment variables instead of being hardcoded in the Python file.
+
+Recommended environment variable names:
+
+```text
+AUTH0_DOMAIN
+AUTH0_CLIENT_ID
+AUTH0_CLIENT_SECRET
+AUTH0_CONNECTION
+```
+
+Example:
+
+```bash
+export AUTH0_DOMAIN="your-tenant.us.auth0.com"
+export AUTH0_CLIENT_ID="your-management-api-client-id"
+export AUTH0_CLIENT_SECRET="your-management-api-client-secret"
+export AUTH0_CONNECTION="Username-Password-Authentication"
+```
+
+If the script still uses hardcoded values, only use it with test tenants and rotate any exposed credentials before making the repository public.
+
+---
+
+## Installation
+
+Install the Python `requests` package before running the script:
 
 ```bash
 python3 -m pip install requests
 ```
 
-Run
+You can confirm the package is installed by running:
 
-Use one of the script commands:
+```bash
+python3 -c "import requests; print(requests.__version__)"
+```
+
+---
+
+## Usage
+
+Run the script using one of the supported commands.
+
+---
+
+## Create a User
 
 ```bash
 python3 create_auth0_user.py create --email test@example.com --password TempPassword123!
+```
+
+Optional fields:
+
+```bash
+python3 create_auth0_user.py create \
+  --email test@example.com \
+  --password TempPassword123! \
+  --name "Test User" \
+  --nickname testuser
+```
+
+### What this does
+
+The script sends a request to the Auth0 Management API to create a new user in the configured database connection.
+
+The request includes:
+
+* Email address
+* Password
+* Connection name
+* Optional full name
+* Optional nickname
+* `email_verified` set to `False`
+
+---
+
+## Update a User
+
+```bash
 python3 create_auth0_user.py update --user-id 'auth0|USER_ID_HERE' --nickname newnickname
+```
+
+Additional update examples:
+
+```bash
+python3 create_auth0_user.py update \
+  --user-id 'auth0|USER_ID_HERE' \
+  --name "Updated Name"
+```
+
+```bash
+python3 create_auth0_user.py update \
+  --user-id 'auth0|USER_ID_HERE' \
+  --email newemail@example.com
+```
+
+```bash
+python3 create_auth0_user.py update \
+  --user-id 'auth0|USER_ID_HERE' \
+  --email-verified true
+```
+
+### Important Shell Note
+
+Keep quotes around Auth0 user IDs because they contain the `|` character.
+
+For example, use this:
+
+```bash
+--user-id 'auth0|USER_ID_HERE'
+```
+
+Do not use this:
+
+```bash
+--user-id auth0|USER_ID_HERE
+```
+
+Without quotes, your shell may treat `|` as a pipe operator.
+
+---
+
+## Delete a User
+
+```bash
 python3 create_auth0_user.py delete --user-id 'auth0|USER_ID_HERE'
 ```
 
-Keep quotes around Auth0 user IDs because they contain `|`, which your shell treats as a pipe.
+By default, the script asks for confirmation before deleting a user.
+
+To skip the confirmation prompt, use:
+
+```bash
+python3 create_auth0_user.py delete --user-id 'auth0|USER_ID_HERE' --yes
+```
+
+### Warning
+
+Deleting a user is destructive. Use this command carefully and only against test users unless the action has been reviewed and approved.
+
+---
+
+## Example Workflow
+
+A basic test workflow may look like this:
+
+```bash
+# 1. Create a test user
+python3 create_auth0_user.py create \
+  --email test@example.com \
+  --password TempPassword123! \
+  --name "Test User" \
+  --nickname testuser
+
+# 2. Copy the returned Auth0 user_id value
+
+# 3. Update the user
+python3 create_auth0_user.py update \
+  --user-id 'auth0|USER_ID_HERE' \
+  --nickname updatedtestuser
+
+# 4. Delete the user
+python3 create_auth0_user.py delete \
+  --user-id 'auth0|USER_ID_HERE'
+```
+
+---
+
+## Error Handling
+
+The script includes basic error handling for Auth0 API calls.
+
+If an Auth0 API request fails, the script prints the status code and the response body when available.
+
+Example scenarios:
+
+| Scenario            | Expected Behavior                                                   |
+| ------------------- | ------------------------------------------------------------------- |
+| User already exists | Script exits with a message explaining that the user already exists |
+| Invalid credentials | Auth0 token request fails                                           |
+| Missing scope       | Auth0 returns an authorization error                                |
+| Invalid user ID     | Update or delete request fails                                      |
+| Network error       | Script exits with a request failure message                         |
+
+---
+
+## Common Issues
+
+### User Already Exists
+
+If a create request fails because the user already exists, use a different email address or update the existing user instead.
+
+### Invalid Client Credentials
+
+Confirm that the Auth0 domain, client ID, and client secret are correct.
+
+### Missing Management API Scopes
+
+Confirm that the Machine-to-Machine application has the required Management API permissions.
+
+### User ID Command Fails
+
+Make sure the Auth0 user ID is wrapped in quotes:
+
+```bash
+'auth0|USER_ID_HERE'
+```
+
+### Wrong Connection
+
+Confirm that the configured connection name matches the database connection in your Auth0 tenant.
+
+Default:
+
+```text
+Username-Password-Authentication
+```
+
+---
+
+## Safe Testing Guidance
+
+Use this tool only with test users and controlled tenants unless you have approval to use it in a real environment.
+
+Recommended test values:
+
+```text
+Email: test@example.com
+Password: TempPassword123!
+Name: Test User
+Nickname: testuser
+```
+
+Do not use real customer accounts, production identities, or sensitive user data for testing.
